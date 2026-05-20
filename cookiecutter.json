@@ -1,0 +1,5 @@
+{
+  "project_name": "My Custom Keycloak",
+  "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '-').replace('_', '-') }}",
+  "keycloak_version": "26.6.1"
+}
