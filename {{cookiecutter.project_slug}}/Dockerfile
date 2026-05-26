@@ -8,7 +8,7 @@ FROM ${BASE_IMAGE}:${KEYCLOAK_VERSION} AS builder
 COPY --chown=1000:0 extensions/ /opt/keycloak/providers/
 COPY --chown=1000:0 themes/     /opt/keycloak/themes/
 
-RUN /opt/keycloak/bin/kc.sh build -- --spi-events-listener-jboss-logging-success-level=info --spi-events-listener-jboss-logging-error-level=warn
+RUN /opt/keycloak/bin/kc.sh build --features=admin-fine-grained-authz -- --spi-events-listener-jboss-logging-success-level=info --spi-events-listener-jboss-logging-error-level=warn
 
 FROM ${BASE_IMAGE}:${KEYCLOAK_VERSION}
 
