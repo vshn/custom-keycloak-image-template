@@ -16,9 +16,9 @@ The generated project ships with:
 ## Usage
 
 ```sh
-cookiecutter gh:<your-org>/custom-keycloak-image
+cookiecutter gh:vshn/custom-keycloak-image-template
 # or from a local clone:
-cookiecutter ./custom-keycloak-image
+cookiecutter ./custom-keycloak-image-template
 ```
 
 You will be prompted for:

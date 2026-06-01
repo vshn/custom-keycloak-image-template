@@ -1,5 +1,6 @@
 .git
 .github
+.gitkeep
 .gitignore
 .dockerignore
 README.md

@@ -60,7 +60,7 @@ Defaults:
 
 - **Pull requests to `main`** → build only (no push)
 - **Pushes to `main`** → build & push to `ghcr.io/<owner>/<repo>` with tags `main`, `sha-<short>`, `latest`
-- **Git tags `v*`** → build & push semver tags (`v1.2.3`, `1.2`)
+- **Git tags `v*`** → build & push semver tags (`1.2.3`, `1.2`)
 
 Authentication uses the workflow-scoped `GITHUB_TOKEN`; no extra secrets are needed for GHCR.
 
@@ -81,4 +81,49 @@ For production, see [Keycloak server docs](https://www.keycloak.org/server/confi
 
 ## Updating the base Keycloak version
 
-Edit the `KEYCLOAK_VERSION` default in the `Dockerfile` (and `Makefile` if you changed it there too). The CI workflow picks it up automatically from the Dockerfile `ARG` default.
+Edit `KEYCLOAK_VERSION` in both the `Dockerfile` ARG default and the `Makefile` variable — the Makefile passes it as `--build-arg` which overrides the Dockerfile default. The CI workflow picks it up from the Makefile variable.
+
+## Using the image in the VSHN Keycloak service
+
+Reference your image in the `VSHNKeycloak` claim by setting the `customImage` field:
+
+```yaml
+apiVersion: vshn.appcat.vshn.io/v1
+kind: VSHNKeycloak
+metadata:
+  name: my-keycloak
+spec:
+  parameters:
+    service:
+      customImage:
+        image: ghcr.io/<owner>/{{ cookiecutter.project_slug }}:<tag>
+```
+
+For images in a private registry, also set `imagePullSecretRef` to a Secret in the claim namespace containing Docker registry credentials:
+
+```yaml
+      customImage:
+        image: registry.example.com/<owner>/{{ cookiecutter.project_slug }}:<tag>
+        imagePullSecretRef:
+          name: my-registry-secret
+```
+
+## Platform feature requirement
+
+The VSHN Keycloak service requires `admin-fine-grained-authz` to be present in the optimized build. Because Keycloak's `--optimized` mode validates that runtime feature flags match what was baked in at build time, this feature must be included in the `kc.sh build` command. The Dockerfile already does this.
+
+If you add your own features, append them as a comma-separated value:
+
+```dockerfile
+RUN /opt/keycloak/bin/kc.sh build --features=admin-fine-grained-authz,my-feature ...
+```
+
+## Maintenance
+
+When using a custom image, **automatic Keycloak version upgrades by the VSHN service are disabled**. You are responsible for:
+
+- Keeping `KEYCLOAK_VERSION` in the `Dockerfile` up to date with the version supported by the service
+- Rebuilding and republishing your image after each version bump
+- Ensuring your extensions remain compatible with the new Keycloak version
+
+Check the VSHN documentation for the currently supported Keycloak version before updating.
